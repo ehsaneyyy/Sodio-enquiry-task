@@ -6,7 +6,7 @@ import {
   uploadEnquiryFile,
 } from "@/features/batches/api/batchesApi"
 
-const batchesQueryKey = ["batches"]
+const batchQueryKey = (batchId: number) => ["batches", batchId]
 
 export function useCreateBatchMutation() {
   const queryClient = useQueryClient()
@@ -14,7 +14,7 @@ export function useCreateBatchMutation() {
   return useMutation({
     mutationFn: (file: File) => uploadEnquiryFile(file),
     onSuccess: (createdBatch) => {
-      queryClient.setQueryData(["batches", createdBatch.batch_id], {
+      queryClient.setQueryData(batchQueryKey(createdBatch.batch_id), {
         id: createdBatch.batch_id,
         filename: null,
         status: "processing",
@@ -35,7 +35,7 @@ export function useCreateBatchMutation() {
 
 export function useBatchDetailQuery(batchId: number | undefined) {
   return useQuery({
-    queryKey: ["batches", batchId],
+    queryKey: batchQueryKey(batchId as number),
     queryFn: () => fetchBatchDetail(batchId as number),
     enabled: batchId !== undefined,
     refetchInterval: (query) => {
@@ -54,7 +54,7 @@ export function useRetryFailedBatchMutation() {
   return useMutation({
     mutationFn: (batchId: number) => retryFailedBatchItems(batchId),
     onSuccess: (retryResult) => {
-      queryClient.setQueryData(["batches", retryResult.batch_id], {
+      queryClient.setQueryData(batchQueryKey(retryResult.batch_id), {
         id: retryResult.batch_id,
         filename: null,
         status: "processing",

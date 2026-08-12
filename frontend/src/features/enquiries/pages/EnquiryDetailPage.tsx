@@ -69,7 +69,7 @@ function initialFormState(enquiry: EnquiryDetail): OverrideFormState {
     budget: effective.budget_raw ?? "",
     timeline: effective.timeline ?? "",
     summary: effective.summary ?? "",
-    is_genuine: effective.is_genuine === null ? "unset" : String(effective.is_genuine),
+    is_genuine: effective.is_genuine === null ? "unset" : effective.is_genuine ? "true" : "false",
   }
 }
 
@@ -155,7 +155,8 @@ function ExtractionHistoryList({ extractionHistory }: { extractionHistory: Extra
             {extraction.error ? (
               <p className="text-destructive mt-3 text-sm">{extraction.error}</p>
             ) : (
-              <dl className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <>
+                <dl className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 <EffectiveValue label="Company" value={extraction.company ?? "—"} />
                 <EffectiveValue label="Contact" value={extraction.contact_name ?? "—"} />
                 <EffectiveValue label="Email" value={extraction.contact_email ?? "—"} />
@@ -171,7 +172,8 @@ function ExtractionHistoryList({ extractionHistory }: { extractionHistory: Extra
               {extraction.summary ? (
                 <p className="text-muted-foreground mt-4 border-t pt-3 text-sm">{extraction.summary}</p>
               ) : null}
-            </div>
+              </>
+            )}
           </CardContent>
         </Card>
       ))}
