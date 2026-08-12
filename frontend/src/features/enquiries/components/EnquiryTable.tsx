@@ -1,5 +1,8 @@
+import { useState } from "react"
 import { Link } from "react-router-dom"
+import { Pencil } from "lucide-react"
 
+import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   Table,
@@ -15,6 +18,7 @@ import {
   GenuineBadge,
   PriorityBadge,
 } from "@/features/enquiries/components/badges"
+import { InlineEnquiryEditRow } from "@/features/enquiries/components/InlineEnquiryEditRow"
 import { formatBudget, formatDateTime } from "@/features/enquiries/components/formatting"
 import type { EnquiryListItem } from "@/features/enquiries/types/enquiryTypes"
 
@@ -45,6 +49,8 @@ export function EnquiryTable({
   enquiries: EnquiryListItem[]
   isLoading: boolean
 }) {
+  const [editingEnquiryId, setEditingEnquiryId] = useState<number | null>(null)
+
   if (isLoading) {
     return <EnquiryTableSkeleton />
   }
@@ -66,47 +72,67 @@ export function EnquiryTable({
           <TableHead>Budget</TableHead>
           <TableHead>Timeline</TableHead>
           <TableHead>Received</TableHead>
+          <TableHead />
         </TableRow>
       </TableHeader>
       <TableBody>
-        {enquiries.map((enquiry) => (
-          <TableRow key={enquiry.id}>
-            <TableCell>
-              <Link to={`/enquiries/${enquiry.id}`} className="font-medium hover:underline">
-                {enquiry.company ?? "—"}
-              </Link>
-            </TableCell>
-            <TableCell>
-              <div className="text-sm">{enquiry.contact_name ?? "—"}</div>
-              {enquiry.contact_email ? (
-                <div className="text-muted-foreground text-xs">{enquiry.contact_email}</div>
-              ) : null}
-            </TableCell>
-            <TableCell>
-              <PriorityBadge priority={enquiry.priority} />
-            </TableCell>
-            <TableCell>
-              <EnquiryStatusBadge status={enquiry.status} />
-            </TableCell>
-            <TableCell>
-              <div className="flex items-center gap-2">
-                <ExtractionStatusBadge extractionStatus={enquiry.extraction_status} />
-                <GenuineBadge isGenuine={enquiry.is_genuine} />
-              </div>
-            </TableCell>
-            <TableCell className="text-muted-foreground">{enquiry.service_line ?? "—"}</TableCell>
-            <TableCell>
-              {formatBudget(enquiry.budget_min, enquiry.budget_max, enquiry.budget_currency)}
-              {enquiry.budget_raw ? (
-                <div className="text-muted-foreground max-w-48 truncate text-xs" title={enquiry.budget_raw}>
-                  {enquiry.budget_raw}
+        {enquiries.map((enquiry) =>
+          enquiry.id === editingEnquiryId ? (
+            <InlineEnquiryEditRow
+              key={enquiry.id}
+              enquiry={enquiry}
+              onSaved={() => setEditingEnquiryId(null)}
+              onCancel={() => setEditingEnquiryId(null)}
+            />
+          ) : (
+            <TableRow key={enquiry.id}>
+              <TableCell>
+                <Link to={`/enquiries/${enquiry.id}`} className="font-medium hover:underline">
+                  {enquiry.company ?? "—"}
+                </Link>
+              </TableCell>
+              <TableCell>
+                <div className="text-sm">{enquiry.contact_name ?? "—"}</div>
+                {enquiry.contact_email ? (
+                  <div className="text-muted-foreground text-xs">{enquiry.contact_email}</div>
+                ) : null}
+              </TableCell>
+              <TableCell>
+                <PriorityBadge priority={enquiry.priority} />
+              </TableCell>
+              <TableCell>
+                <EnquiryStatusBadge status={enquiry.status} />
+              </TableCell>
+              <TableCell>
+                <div className="flex items-center gap-2">
+                  <ExtractionStatusBadge extractionStatus={enquiry.extraction_status} />
+                  <GenuineBadge isGenuine={enquiry.is_genuine} />
                 </div>
-              ) : null}
-            </TableCell>
-            <TableCell className="text-muted-foreground">{enquiry.timeline ?? "—"}</TableCell>
-            <TableCell className="text-muted-foreground">{formatDateTime(enquiry.created_at)}</TableCell>
-          </TableRow>
-        ))}
+              </TableCell>
+              <TableCell className="text-muted-foreground">{enquiry.service_line ?? "—"}</TableCell>
+              <TableCell>
+                {formatBudget(enquiry.budget_min, enquiry.budget_max, enquiry.budget_currency)}
+                {enquiry.budget_raw ? (
+                  <div className="text-muted-foreground max-w-48 truncate text-xs" title={enquiry.budget_raw}>
+                    {enquiry.budget_raw}
+                  </div>
+                ) : null}
+              </TableCell>
+              <TableCell className="text-muted-foreground">{enquiry.timeline ?? "—"}</TableCell>
+              <TableCell className="text-muted-foreground">{formatDateTime(enquiry.created_at)}</TableCell>
+              <TableCell>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="size-8"
+                  onClick={() => setEditingEnquiryId(enquiry.id)}
+                >
+                  <Pencil />
+                </Button>
+              </TableCell>
+            </TableRow>
+          ),
+        )}
       </TableBody>
     </Table>
   )
