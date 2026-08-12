@@ -1,7 +1,7 @@
 import asyncio
 from typing import Optional
 
-from sqlalchemy import select
+from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.core.config import get_settings

@@ -21,7 +21,7 @@ OVERRIDABLE_FIELDS = [
 ASAP_WORDS = ["asap", "immediate", "as soon", "now", "today", "urgent", "emergency", "tonight", "this week", "next week"]
 FLEXIBLE_WORDS = ["flexible", "tbd", "whenever", "open-ended", "not finalised", "not yet"]
 LATER_WORDS = ["next year", "q3", "q4", "eighteen", "phased", "milestone"]
-NEAR_WORDS = ["week", "month", "q1", "q2", "before", "by ", "quarter", "this year", "september", "october", "november", "december"]
+NEAR_WORDS = ["week", "weeks", "month", "months", "q1", "q2", "before", "by ", "quarter", "quarters", "this year", "september", "october", "november", "december"]
 
 
 def _word_boundary_pattern(word: str) -> str:
