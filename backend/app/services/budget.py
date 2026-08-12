@@ -34,7 +34,7 @@ CURRENCY_BY_WORD = {
 }
 
 NUMBER_TOKEN = re.compile(r"(\d[\d.,]*)\s*((?:k|thousand|lakh|crore|mn|million|bn|billion|m|b)(?![a-z]))?", re.IGNORECASE)
-GLOBAL_MAGNITUDE_WORD = re.compile(r"\b(k|thousand|lakh|crore|mn|million|bn|billion|m|b)\b", re.IGNORECASE)
+GLOBAL_MAGNITUDE_WORD = re.compile(r"\b(k|thousand|lakh|crore|mn|million|bn|billion|m|b)s?\b", re.IGNORECASE)
 RANGE_CONNECTOR = re.compile(r"-|–|—|~|\s+to\s+|\sand\s|\sor\s", re.IGNORECASE)
 
 

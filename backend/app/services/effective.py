@@ -19,8 +19,8 @@ OVERRIDABLE_FIELDS = [
 ]
 
 ASAP_WORDS = ["asap", "immediate", "as soon", "now", "today", "urgent", "emergency", "tonight", "this week", "next week"]
-NEAR_WORDS = ["week", "month", "q1", "q2", "before", "by ", "quarter", "this year"]
-LATER_WORDS = ["next year", "q3", "q4", "months", "eighteen", "phased", "milestone", "flexible"]
+NEAR_WORDS = ["week", "month", "q1", "q2", "before", "by ", "quarter", "this year", "september", "october", "november", "december"]
+LATER_WORDS = ["next year", "q3", "q4", "months", "eighteen", "phased", "milestone"]
 FLEXIBLE_WORDS = ["flexible", "tbd", "whenever", "open-ended", "not finalised", "not yet"]
 
 

@@ -33,8 +33,8 @@ EMAIL_LINE = re.compile(r"^Email:\s*(.+?)\s*$", re.MULTILINE)
 NAME_IN_BODY = re.compile(r"^Name:\s*(.+?)\s*$", re.MULTILINE)
 MESSAGE_LINE = re.compile(r"^Message:\s*(.*)$", re.MULTILINE)
 EMAIL_PATTERN = re.compile(r"^[\w.+-]+@[\w-]+\.[\w.]+$")
-AMOUNT_LINE = re.compile(r"[£€₹$]|lakh|crore|\d[\d,.]*\s*[kKmMbB]?\b", re.IGNORECASE)
-BUDGET_KEYWORD_LINE = re.compile(r"budget|allocated|spend|costs|presupuesto|pay|tbd|flexible|charge", re.IGNORECASE)
+AMOUNT_LINE = re.compile(r"[£€₹$]|\d[\d.,]*\s*[kKmMbB]\b|lakh|crore", re.IGNORECASE)
+BUDGET_KEYWORD_LINE = re.compile(r"budget|allocated|allocation|spend|costs|presupuesto|pay|tbd|flexible|charge", re.IGNORECASE)
 TIMELINE_PATTERNS = [
     (r"\basap\b", "ASAP"),
     (r"next week", "next week"),
@@ -129,11 +129,11 @@ class StubProvider(LLMProvider):
         for line in message.splitlines():
             stripped = line.strip()
             if AMOUNT_LINE.search(stripped):
-                return stripped.split(".")[0]
+                return stripped[:200]
         for line in message.splitlines():
             stripped = line.strip()
             if BUDGET_KEYWORD_LINE.search(stripped):
-                return stripped.split(".")[0]
+                return stripped[:200]
         return None
 
     @staticmethod
