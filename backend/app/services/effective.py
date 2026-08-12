@@ -19,9 +19,9 @@ OVERRIDABLE_FIELDS = [
 ]
 
 ASAP_WORDS = ["asap", "immediate", "as soon", "now", "today", "urgent", "emergency", "tonight", "this week", "next week"]
-NEAR_WORDS = ["week", "month", "q1", "q2", "before", "by ", "quarter", "this year", "september", "october", "november", "december"]
-LATER_WORDS = ["next year", "q3", "q4", "months", "eighteen", "phased", "milestone"]
 FLEXIBLE_WORDS = ["flexible", "tbd", "whenever", "open-ended", "not finalised", "not yet"]
+LATER_WORDS = ["next year", "q3", "q4", "eighteen", "phased", "milestone"]
+NEAR_WORDS = ["week", "month", "q1", "q2", "before", "by ", "quarter", "this year", "september", "october", "november", "december"]
 
 
 def _word_boundary_pattern(word: str) -> str:
@@ -38,12 +38,12 @@ def infer_urgency_from_timeline(timeline_text: Optional[str]) -> Optional[Timeli
     for word in FLEXIBLE_WORDS:
         if re.search(_word_boundary_pattern(word), normalized):
             return TimelineUrgency.flexible
-    for word in NEAR_WORDS:
-        if re.search(_word_boundary_pattern(word), normalized):
-            return TimelineUrgency.near
     for word in LATER_WORDS:
         if re.search(_word_boundary_pattern(word), normalized):
             return TimelineUrgency.later
+    for word in NEAR_WORDS:
+        if re.search(_word_boundary_pattern(word), normalized):
+            return TimelineUrgency.near
     return TimelineUrgency.unknown
 
 

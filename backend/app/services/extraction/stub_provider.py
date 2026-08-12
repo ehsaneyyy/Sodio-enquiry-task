@@ -20,6 +20,8 @@ TOP_LEVEL_DOMAINS = {
     "com", "co", "org", "net", "edu", "io", "uk", "de", "es", "jp", "in", "cw", "xyz", "biz", "dev", "app",
 }
 
+FREE_EMAIL_DOMAINS = {"gmail", "googlemail", "yahoo", "hotmail", "outlook", "icloud", "protonmail", "aol"}
+
 SERVICE_KEYWORD_ORDER = [
     (ServiceLine.game, ["game", "gaming", "casino", "dice"]),
     (ServiceLine.blockchain, ["token", "smart contract", "blockchain", "escrow", "crypto", "staking", "defi", "nft"]),
@@ -33,7 +35,7 @@ EMAIL_LINE = re.compile(r"^Email:\s*(.+?)\s*$", re.MULTILINE)
 NAME_IN_BODY = re.compile(r"^Name:\s*(.+?)\s*$", re.MULTILINE)
 MESSAGE_LINE = re.compile(r"^Message:\s*(.*)$", re.MULTILINE)
 EMAIL_PATTERN = re.compile(r"^[\w.+-]+@[\w-]+\.[\w.]+$")
-AMOUNT_LINE = re.compile(r"[£€₹$]|\d[\d.,]*\s*[kKmMbB]\b|lakh|crore", re.IGNORECASE)
+AMOUNT_LINE = re.compile(r"[£€₹$]|\d[\d.,]*\s*[kK]\b|lakh|crore", re.IGNORECASE)
 BUDGET_KEYWORD_LINE = re.compile(r"budget|allocated|allocation|spend|costs|presupuesto|pay|tbd|flexible|charge", re.IGNORECASE)
 TIMELINE_PATTERNS = [
     (r"\basap\b", "ASAP"),
@@ -99,9 +101,12 @@ class StubProvider(LLMProvider):
     def _guess_company(sender: Optional[str], email: Optional[str], text: str) -> Optional[str]:
         domain = email.split("@")[-1] if email else None
         if domain:
-            parts = [part.capitalize() for part in re.split(r"[\W_]+", domain) if part and part.lower() not in TOP_LEVEL_DOMAINS]
-            if parts:
-                return " ".join(parts)
+            domain_parts = [part.lower() for part in re.split(r"[\W_]+", domain) if part]
+            meaningful_parts = [
+                part for part in domain_parts if part not in TOP_LEVEL_DOMAINS and part not in FREE_EMAIL_DOMAINS
+            ]
+            if meaningful_parts:
+                return " ".join(part.capitalize() for part in meaningful_parts)
         if sender and sender.lower() not in GENERIC_SENDER_LABELS:
             return sender
         return None
@@ -117,7 +122,7 @@ class StubProvider(LLMProvider):
 
     @staticmethod
     def _guess_service_line(message: str) -> ServiceLine:
-        normalized = message.lower()
+        normalized = re.sub(r"\s+", " ", message).lower()
         for service_line, keywords in SERVICE_KEYWORD_ORDER:
             for keyword in keywords:
                 if keyword in normalized:

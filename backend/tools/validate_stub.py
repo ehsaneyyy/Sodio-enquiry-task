@@ -49,7 +49,8 @@ async def main():
         print(
             f"{index:>2} | {priority:<6} | genuine={str(effective['is_genuine']):<5} | "
             f"svc={effective['service_line'] or '-':<10} | budget={effective['budget_raw'] or '-':<40} "
-            f"| norm={budget_min} {budget_currency or ''} | tl={effective['timeline'] or '-'} | "
+            f"| norm={budget_min}{'-' + str(budget_max) if budget_max and budget_max != budget_min else ''} "
+            f"{budget_currency or ''} | tl={effective['timeline'] or '-'} | "
             f"email={effective['contact_email'] or '-'} | {result.company or '-'}"
         )
 

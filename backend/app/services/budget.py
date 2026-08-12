@@ -33,9 +33,13 @@ CURRENCY_BY_WORD = {
     "rupees": "INR",
 }
 
-NUMBER_TOKEN = re.compile(r"(\d[\d.,]*)\s*((?:k|thousand|lakh|crore|mn|million|bn|billion|m|b)(?![a-z]))?", re.IGNORECASE)
+NUMBER_WITH_UNIT = r"(\d[\d.,]*)\s*((?:k|thousand|lakh|crore|mn|million|bn|billion|m|b)(?![a-z]))?"
+NUMBER_TOKEN = re.compile(NUMBER_WITH_UNIT, re.IGNORECASE)
+RANGE_PATTERN = re.compile(
+    NUMBER_WITH_UNIT + r"\s*(?:-|–|—|~|\s+to\s+|\s+and\s+|\s+or\s+)\s*[£€₹$]?\s*" + NUMBER_WITH_UNIT,
+    re.IGNORECASE,
+)
 GLOBAL_MAGNITUDE_WORD = re.compile(r"\b(k|thousand|lakh|crore|mn|million|bn|billion|m|b)s?\b", re.IGNORECASE)
-RANGE_CONNECTOR = re.compile(r"-|–|—|~|\s+to\s+|\sand\s|\sor\s", re.IGNORECASE)
 
 
 def normalize_llm_budget(
@@ -73,20 +77,56 @@ def _parse_amount(raw_number: str, multiplier: float) -> float:
     return float(raw_number) * multiplier
 
 
+def _resolve_amount(raw_number: str, suffix: Optional[str], global_multiplier: float) -> float:
+    multiplier = MAGNITUDE_MULTIPLIERS.get(suffix.lower(), 1) if suffix else global_multiplier
+    return _parse_amount(raw_number, multiplier)
+
+
+def _global_magnitude_unit(raw: str) -> Optional[str]:
+    word_match = GLOBAL_MAGNITUDE_WORD.search(raw)
+    if word_match:
+        return word_match.group(1).lower()
+    for token in NUMBER_TOKEN.finditer(raw):
+        if token.group(2):
+            return token.group(2).lower()
+    return None
+
+
+def _global_multiplier_from(raw: str) -> float:
+    unit = _global_magnitude_unit(raw)
+    return MAGNITUDE_MULTIPLIERS.get(unit, 1) if unit else 1
+
+
+def _single_amount(raw: str, global_multiplier: float) -> Optional[float]:
+    tokens = list(NUMBER_TOKEN.finditer(raw))
+    if not tokens:
+        return None
+    symbol_positions = [raw.find(symbol) for symbol in CURRENCY_BY_SYMBOL if raw.find(symbol) != -1]
+    if symbol_positions:
+        nearest_symbol = min(symbol_positions)
+        nearest_token = min(tokens, key=lambda token: abs(token.start() - nearest_symbol))
+        return _resolve_amount(nearest_token.group(1), nearest_token.group(2), global_multiplier)
+    unit_tokens = [token for token in tokens if token.group(2)]
+    target_token = unit_tokens[0] if unit_tokens else tokens[0]
+    return _resolve_amount(target_token.group(1), target_token.group(2), global_multiplier)
+
+
 def parse_budget_string(raw: Optional[str]) -> tuple[Optional[float], Optional[float], Optional[str]]:
     if not raw:
         return None, None, None
     currency = _detect_currency(raw)
-    global_match = GLOBAL_MAGNITUDE_WORD.search(raw)
-    global_multiplier = MAGNITUDE_MULTIPLIERS.get(global_match.group(1).lower(), 1) if global_match else 1
-    amounts: list[float] = []
-    for match in NUMBER_TOKEN.finditer(raw):
-        suffix_multiplier = MAGNITUDE_MULTIPLIERS.get(match.group(2).lower(), 1) if match.group(2) else global_multiplier
-        amounts.append(_parse_amount(match.group(1), suffix_multiplier))
-    if not amounts:
+    global_multiplier = _global_multiplier_from(raw)
+    range_match = RANGE_PATTERN.search(raw)
+    if range_match:
+        first_amount = _resolve_amount(range_match.group(1), range_match.group(2), global_multiplier)
+        second_amount = _resolve_amount(range_match.group(3), range_match.group(4), global_multiplier)
+        budget_min, budget_max = min(first_amount, second_amount), max(first_amount, second_amount)
+        if currency is None and _global_magnitude_unit(raw) in {"lakh", "crore"}:
+            currency = "INR"
+        return budget_min, budget_max, currency
+    amount = _single_amount(raw, global_multiplier)
+    if amount is None:
         return None, None, currency
-    if len(amounts) == 1:
-        return amounts[0], amounts[0], currency
-    if RANGE_CONNECTOR.search(raw):
-        return min(amounts[0], amounts[1]), max(amounts[0], amounts[1]), currency
-    return amounts[0], amounts[0], currency
+    if currency is None and _global_magnitude_unit(raw) in {"lakh", "crore"}:
+        currency = "INR"
+    return amount, amount, currency
