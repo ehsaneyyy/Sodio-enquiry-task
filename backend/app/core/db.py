@@ -2,12 +2,18 @@ from collections.abc import AsyncGenerator
 
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import NullPool
 from sqlmodel import SQLModel
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.core.config import get_settings
 
-engine = create_async_engine(get_settings().database_url, echo=False)
+_database_url = get_settings().database_url
+engine = create_async_engine(
+    _database_url,
+    echo=False,
+    poolclass=NullPool if _database_url.startswith("sqlite") else None,
+)
 session_factory = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 

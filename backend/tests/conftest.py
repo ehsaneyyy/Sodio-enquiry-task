@@ -20,6 +20,13 @@ async def _fresh_database():
         await connection.run_sync(SQLModel.metadata.drop_all)
         await connection.run_sync(SQLModel.metadata.create_all)
     yield
+    for task in asyncio.all_tasks():
+        if task is not asyncio.current_task():
+            task.cancel()
+    for task in asyncio.all_tasks():
+        if task is not asyncio.current_task():
+            await asyncio.gather(task, return_exceptions=True)
+    await engine.dispose()
 
 
 @pytest.fixture

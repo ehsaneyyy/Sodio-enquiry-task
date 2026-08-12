@@ -3,6 +3,7 @@ __pycache__/
 *.pyc
 .env
 *.db
+*.db-journal
 *.sqlite3
 frontend/node_modules/
 frontend/dist/
