@@ -11,4 +11,3 @@ frontend/dist/
 frontend/.vite/
 .pytest_cache/
 .DS_Store
-screenshots/*.png

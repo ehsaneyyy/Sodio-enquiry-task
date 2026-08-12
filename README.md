@@ -77,6 +77,24 @@ Doesn't / limitations:
 - Extractions happen once per enquiry at creation/batch time — no periodic re-scoring unless
   a human triggers re-extraction.
 
+### Screenshots
+
+Dashboard with the sample file loaded, filters and inline edit available:
+
+![dashboard](screenshots/1-dashboard.png)
+
+Detail view — original text alongside the latest extraction, overrides and history:
+
+![detail view](screenshots/2-detail.png)
+
+A row on the dashboard in inline-edit mode:
+
+![inline edit](screenshots/3-inline-edit.png)
+
+Batch upload card after processing `sample-enquiries.txt`:
+
+![batch processing](screenshots/4-batches.png)
+
 ## Decisions
 
 The brief deliberately left ambiguities open. These are the answers I shipped and why:
