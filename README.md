@@ -8,6 +8,15 @@ correct and triage them.
   `DATABASE_URL`, e.g. Neon Postgres). LLM calls sit behind a provider interface.
 - **Frontend**: Vite + React + TypeScript + Tailwind + shadcn/ui + TanStack Query + axios.
 
+## Live demo
+
+- **Frontend (Vercel)**: https://sodio-enquiry-task.vercel.app
+- **Backend (Render)**: https://sodio-enquiry-backend.onrender.com/api — `GET /health` for a liveness check.
+
+The backend runs on Render's free tier and spins down after ~15 minutes without traffic, so
+the first request after idle takes about a minute to spin back up (the frontend waits without
+timing out).
+
 ## Run it
 
 Prereqs: Python 3.11+, Node 20+.
@@ -73,7 +82,8 @@ Doesn't / limitations:
 - Summary is editable on the detail page, not inline in the list.
 - No automated frontend tests (backend has 59). Build + lint are clean.
 - No auth / multi-user (explicitly out of scope in the brief).
-- No deployment config; local run only.
+- Live deployment runs on Vercel (frontend) + Render (backend, free tier — see **Live demo**
+  for the cold-start caveat) with Neon Postgres; local run uses SQLite.
 - Extractions happen once per enquiry at creation/batch time — no periodic re-scoring unless
   a human triggers re-extraction.
 
